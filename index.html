@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sana Iqbal-Khan — Research Strategist</title>
+  <title>Sana Iqbal-Khan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -27,6 +27,8 @@
       line-height: 1.7;
       overflow-x: hidden;
     }
+
+    /* NAV */
     nav {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -57,6 +59,8 @@
       transition: color 0.25s;
     }
     .nav-links a:hover { color: var(--clay); }
+
+    /* HERO */
     #hero {
       min-height: 100vh;
       display: grid;
@@ -99,7 +103,6 @@
       line-height: 1.8;
     }
     .hero-image {
-      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -130,15 +133,8 @@
       text-transform: uppercase;
       padding: 0.6rem 1rem;
     }
-    .hero-image::before {
-      content: '';
-      position: absolute;
-      top: -2rem; left: -2rem;
-      width: 120px; height: 120px;
-      border: 1px solid var(--rule);
-      border-radius: 50%;
-      pointer-events: none;
-    }
+
+    /* SHARED */
     .section-label {
       font-size: 0.7rem;
       letter-spacing: 0.22em;
@@ -161,6 +157,8 @@
       font-weight: 300;
       line-height: 1.2;
     }
+
+    /* ABOUT */
     #about {
       background: var(--ink);
       color: var(--warm);
@@ -194,6 +192,8 @@
       padding: 0.35rem 0.85rem;
       border-radius: 100px;
     }
+
+    /* PHILOSOPHY */
     #philosophy { padding: 7rem 4rem; text-align: center; }
     #philosophy .inner { max-width: 720px; margin: 0 auto; }
     #philosophy .section-label { justify-content: center; }
@@ -205,9 +205,10 @@
       font-style: italic;
       line-height: 1.45;
       color: var(--ink);
-      margin: 1.5rem 0 2rem;
+      margin: 1.5rem 0;
     }
-    .philosophy-body { color: var(--muted); font-size: 1rem; line-height: 1.85; }
+
+    /* FOOTER */
     footer {
       background: var(--ink);
       color: var(--muted);
@@ -218,12 +219,13 @@
       font-size: 0.75rem;
       letter-spacing: 0.08em;
     }
+
+    /* RESPONSIVE */
     @media (max-width: 860px) {
       nav { padding: 1.25rem 2rem; }
       #hero { grid-template-columns: 1fr; padding: 7rem 2rem 4rem; min-height: auto; gap: 3rem; }
       .hero-image { order: -1; }
       .portrait-frame { width: min(240px, 70vw); aspect-ratio: 1/1; border-radius: 50%; }
-      .hero-image::before { display: none; }
       #about { padding: 5rem 2rem; }
       #about .inner { grid-template-columns: 1fr; gap: 2.5rem; }
       #philosophy { padding: 5rem 2rem; }
@@ -237,7 +239,7 @@
     <a class="nav-logo" href="#">Sana Iqbal-Khan</a>
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
-      <li><a href="https://linkedin.com/in/sanaiqbal" target="_blank">Contact</a></li>
+      <li><a href="https://www.linkedin.com/in/sanaiqbal" target="_blank">Contact</a></li>
     </ul>
   </nav>
 
@@ -251,7 +253,7 @@
     </div>
     <div class="hero-image">
       <div class="portrait-frame">
-        <img src="headshot.jpg" alt="Sana Iqbal-Khan" />
+        <img src="headshot.jpeg" alt="Sana Iqbal-Khan" />
         <span class="portrait-tag">New York</span>
       </div>
     </div>
@@ -265,7 +267,7 @@
       </div>
       <div class="about-body">
         <p>
-          My practice is rooted in <strong>design research & strategy, participatory design, and systems thinking</strong>. My practice is grounded in getting close to real human experience — then building the frameworks that help institutions act on what they learn.
+          My practice is rooted in <strong>design research &amp; strategy, participatory design, and systems thinking</strong>. Grounded in getting close to real human experience — then building the frameworks that help institutions act on what they learn.
         </p>
         <p>
           I am passionate about designing better human experiences and digital solutions grounded in evidence. I am drawn to ambiguous, high-stakes problems: the kind that sit at the edge of what an organization knows how to do — and helping them de-risk the decisions that matter most.
@@ -286,10 +288,7 @@
     <div class="inner">
       <p class="section-label">Philosophy</p>
       <p class="philosophy-quote">
-        "The goal isn't just better research.<br>It's creating the conditions for insight to drive action."
-      </p>
-      <p class="philosophy-body">
-        The most powerful thing a researcher can do isn't produce a deck — it's change how an institution thinks. That means working at the level of structure, not just synthesis: shaping the conditions that determine whether insight actually moves anything.
+        "The goal isn't just better research. It's creating the conditions for insight to drive action."
       </p>
     </div>
   </section>
