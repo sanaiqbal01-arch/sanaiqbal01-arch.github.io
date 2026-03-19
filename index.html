@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sana Iqbal-Khan — Research Strategist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:   #1a1714;
+      --warm:  #f5f0e8;
+      --sand:  #e8dfd0;
+      --clay:  #b5895a;
+      --muted: #7a6e63;
+      --rule:  #d6cfc4;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--warm);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 4rem;
+      background: rgba(245, 240, 232, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.25s;
+    }
+    .nav-links a:hover { color: var(--clay); }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 8rem 4rem 4rem;
+      gap: 4rem;
+    }
+    .hero-text { max-width: 520px; }
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--clay);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--clay);
+    }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 300;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.5rem;
+    }
+    h1 em { font-style: italic; color: var(--clay); }
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 420px;
+      line-height: 1.8;
+    }
+    .hero-image {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .portrait-frame {
+      width: min(380px, 100%);
+      aspect-ratio: 3/4;
+      background: var(--sand);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(26, 23, 20, 0.12);
+    }
+    .portrait-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .portrait-tag {
+      position: absolute;
+      bottom: 0; right: 0;
+      background: var(--clay);
+      color: var(--warm);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.6rem 1rem;
+    }
+    .hero-image::before {
+      content: '';
+      position: absolute;
+      top: -2rem; left: -2rem;
+      width: 120px; height: 120px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* SHARED */
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--clay);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .section-label::after {
+      content: '';
+      width: 2rem;
+      height: 1px;
+      background: var(--clay);
+    }
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 300;
+      line-height: 1.2;
+    }
+
+    /* ABOUT */
+    #about {
+      background: var(--ink);
+      color: var(--warm);
+      padding: 7rem 4rem;
+    }
+    #about .inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 6rem;
+      align-items: start;
+    }
+    #about .section-label { color: #d4a96a; }
+    #about .section-label::after { background: #d4a96a; }
+    #about h2 { color: var(--warm); }
+    .about-body p {
+      color: rgba(245, 240, 232, 0.72);
+      margin-bottom: 1.25rem;
+      font-size: 1.05rem;
+      line-height: 1.85;
+    }
+    .about-body p strong { color: var(--warm); font-weight: 400; }
+    .about-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2rem; }
+    .tag {
+      border: 1px solid rgba(245, 240, 232, 0.18);
+      color: rgba(245, 240, 232, 0.5);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.85rem;
+      border-radius: 100px;
+    }
+
+    /* PHILOSOPHY */
+    #philosophy { padding: 7rem 4rem; text-align: center; }
+    #philosophy .inner { max-width: 720px; margin: 0 auto; }
+    #philosophy .section-label { justify-content: center; }
+    #philosophy .section-label::after { display: none; }
+    .philosophy-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 3vw, 2.4rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.45;
+      color: var(--ink);
+      margin: 1.5rem 0 2rem;
+    }
+    .philosophy-body { color: var(--muted); font-size: 1rem; line-height: 1.85; }
+
+    /* CONTACT */
+    #contact {
+      background: var(--clay);
+      color: var(--warm);
+      padding: 7rem 4rem;
+      text-align: center;
+    }
+    #contact .inner { max-width: 600px; margin: 0 auto; }
+    #contact .section-label { justify-content: center; color: rgba(245,240,232,0.55); }
+    #contact .section-label::after { background: rgba(245,240,232,0.35); }
+    #contact h2 { color: var(--warm); margin-bottom: 1rem; }
+    #contact p { color: rgba(245,240,232,0.75); margin-bottom: 2.5rem; font-size: 1.05rem; }
+    .contact-links { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .contact-link {
+      text-decoration: none;
+      color: var(--warm);
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(245,240,232,0.35);
+      padding-bottom: 0.2rem;
+      transition: border-color 0.25s;
+    }
+    .contact-link:hover { border-color: var(--warm); }
+
+    /* FOOTER */
+    footer {
+      background: var(--ink);
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 4rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 860px) {
+      nav { padding: 1.25rem 2rem; }
+      #hero { grid-template-columns: 1fr; padding: 7rem 2rem 4rem; min-height: auto; gap: 3rem; }
+      .hero-image { order: -1; }
+      .portrait-frame { width: min(240px, 70vw); aspect-ratio: 1/1; border-radius: 50%; }
+      .hero-image::before { display: none; }
+      #about { padding: 5rem 2rem; }
+      #about .inner { grid-template-columns: 1fr; gap: 2.5rem; }
+      #philosophy, #contact { padding: 5rem 2rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="#">Sana Iqbal-Khan</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-text">
+      <p class="hero-eyebrow">Research · Strategy · Systems</p>
+      <h1>Bringing clarity<br>to <em>complex</em><br>problems.</h1>
+      <p class="hero-desc">
+        I work at the intersection of user-centered research and digital experience design — helping organizations de-risk the decisions that matter most.
+      </p>
+    </div>
+    <div class="hero-image">
+      <div class="portrait-frame">
+        <img
+          src="https://images.squarespace-cdn.com/content/v1/577a7963d1758e24017a0ba6/1525883692488-T0S4CQI0ZDR4AQRSVTN4/Headshot+by+Isha+and+logo-01.png"
+          alt="Sana Iqbal-Khan"
+          onerror="this.style.display='none'"
+        />
+        <span class="portrait-tag">New York</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="inner">
+      <div>
+        <p class="section-label">About</p>
+        <h2>Researcher.<br>Strategist.<br>Sense-maker.</h2>
+      </div>
+      <div class="about-body">
+        <p>
+          I work at the intersection of <strong>user research, design strategy, and systems thinking</strong>. My practice is grounded in getting close to real human experience — then building the frameworks that help institutions act on what they learn.
+        </p>
+        <p>
+          I'm passionate about designing better human experiences and digital solutions grounded in evidence. I'm drawn to ambiguous, high-stakes problems: the kind that sit at the edge of what an organization knows how to do — and helping them de-risk the decisions that matter most.
+        </p>
+        <div class="about-tags">
+          <span class="tag">User Research</span>
+          <span class="tag">Journey Mapping</span>
+          <span class="tag">Stakeholder Strategy</span>
+          <span class="tag">Systems Design</span>
+          <span class="tag">Sense-Making</span>
+          <span class="tag">Digital Experience</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHILOSOPHY -->
+  <section id="philosophy">
+    <div class="inner">
+      <p class="section-label">Philosophy</p>
+      <p class="philosophy-quote">
+        "The goal isn't just better research.<br>It's creating the conditions for insight to drive action."
+      </p>
+      <p class="philosophy-body">
+        The most powerful thing a researcher can do isn't produce a deck — it's change how an institution thinks. That means working at the level of structure, not just synthesis: shaping the conditions that determine whether insight actually moves anything.
+      </p>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="inner">
+      <p class="section-label">Get in touch</p>
+      <h2>Let's work<br><em>together.</em></h2>
+      <p>Open to conversations about research leadership, design strategy, and the messier problems worth solving.</p>
+      <div class="contact-links">
+        <a class="contact-link" href="/cdn-cgi/l/email-protection#066e636a6a6946756768676f7764676a2865696b">Email</a>
+        <a class="contact-link" href="https://linkedin.com/in/sanaiqbal" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 Sana Iqbal-Khan</span>
+    <span>Research · Strategy · Sy
