@@ -7,10 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --ink:   #1a1714;
       --warm:  #f5f0e8;
@@ -19,9 +17,7 @@
       --muted: #7a6e63;
       --rule:  #d6cfc4;
     }
-
     html { scroll-behavior: smooth; }
-
     body {
       background: var(--warm);
       color: var(--ink);
@@ -31,8 +27,6 @@
       line-height: 1.7;
       overflow-x: hidden;
     }
-
-    /* NAV */
     nav {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -63,8 +57,6 @@
       transition: color 0.25s;
     }
     .nav-links a:hover { color: var(--clay); }
-
-    /* HERO */
     #hero {
       min-height: 100vh;
       display: grid;
@@ -147,8 +139,6 @@
       border-radius: 50%;
       pointer-events: none;
     }
-
-    /* SHARED */
     .section-label {
       font-size: 0.7rem;
       letter-spacing: 0.22em;
@@ -171,8 +161,6 @@
       font-weight: 300;
       line-height: 1.2;
     }
-
-    /* ABOUT */
     #about {
       background: var(--ink);
       color: var(--warm);
@@ -206,8 +194,6 @@
       padding: 0.35rem 0.85rem;
       border-radius: 100px;
     }
-
-    /* PHILOSOPHY */
     #philosophy { padding: 7rem 4rem; text-align: center; }
     #philosophy .inner { max-width: 720px; margin: 0 auto; }
     #philosophy .section-label { justify-content: center; }
@@ -222,33 +208,6 @@
       margin: 1.5rem 0 2rem;
     }
     .philosophy-body { color: var(--muted); font-size: 1rem; line-height: 1.85; }
-
-    /* CONTACT */
-    #contact {
-      background: var(--clay);
-      color: var(--warm);
-      padding: 7rem 4rem;
-      text-align: center;
-    }
-    #contact .inner { max-width: 600px; margin: 0 auto; }
-    #contact .section-label { justify-content: center; color: rgba(245,240,232,0.55); }
-    #contact .section-label::after { background: rgba(245,240,232,0.35); }
-    #contact h2 { color: var(--warm); margin-bottom: 1rem; }
-    #contact p { color: rgba(245,240,232,0.75); margin-bottom: 2.5rem; font-size: 1.05rem; }
-    .contact-links { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
-    .contact-link {
-      text-decoration: none;
-      color: var(--warm);
-      font-size: 0.78rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      border-bottom: 1px solid rgba(245,240,232,0.35);
-      padding-bottom: 0.2rem;
-      transition: border-color 0.25s;
-    }
-    .contact-link:hover { border-color: var(--warm); }
-
-    /* FOOTER */
     footer {
       background: var(--ink);
       color: var(--muted);
@@ -259,8 +218,6 @@
       font-size: 0.75rem;
       letter-spacing: 0.08em;
     }
-
-    /* RESPONSIVE */
     @media (max-width: 860px) {
       nav { padding: 1.25rem 2rem; }
       #hero { grid-template-columns: 1fr; padding: 7rem 2rem 4rem; min-height: auto; gap: 3rem; }
@@ -269,7 +226,7 @@
       .hero-image::before { display: none; }
       #about { padding: 5rem 2rem; }
       #about .inner { grid-template-columns: 1fr; gap: 2.5rem; }
-      #philosophy, #contact { padding: 5rem 2rem; }
+      #philosophy { padding: 5rem 2rem; }
       footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem 2rem; }
     }
   </style>
@@ -280,11 +237,10 @@
     <a class="nav-logo" href="#">Sana Iqbal-Khan</a>
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
-      <li><a href="#contact">Contact</a></li>
+      <li><a href="https://linkedin.com/in/sanaiqbal" target="_blank">Contact</a></li>
     </ul>
   </nav>
 
-  <!-- HERO -->
   <section id="hero">
     <div class="hero-text">
       <p class="hero-eyebrow">Research · Strategy · Systems</p>
@@ -295,17 +251,12 @@
     </div>
     <div class="hero-image">
       <div class="portrait-frame">
-        <img
-          src="headshot.jpg"
-          alt="Sana Iqbal-Khan"
-          onerror="this.style.display='none'"
-        />
+        <img src="headshot.jpg" alt="Sana Iqbal-Khan" />
         <span class="portrait-tag">New York</span>
       </div>
     </div>
   </section>
 
-  <!-- ABOUT -->
   <section id="about">
     <div class="inner">
       <div>
@@ -317,7 +268,7 @@
           I work at the intersection of <strong>user research, design strategy, and systems thinking</strong>. My practice is grounded in getting close to real human experience — then building the frameworks that help institutions act on what they learn.
         </p>
         <p>
-          I'm passionate about designing better human experiences and digital solutions grounded in evidence. I'm drawn to ambiguous, high-stakes problems: the kind that sit at the edge of what an organization knows how to do — and helping them de-risk the decisions that matter most.
+          I am passionate about designing better human experiences and digital solutions grounded in evidence. I am drawn to ambiguous, high-stakes problems: the kind that sit at the edge of what an organization knows how to do — and helping them de-risk the decisions that matter most.
         </p>
         <div class="about-tags">
           <span class="tag">User Research</span>
@@ -331,7 +282,6 @@
     </div>
   </section>
 
-  <!-- PHILOSOPHY -->
   <section id="philosophy">
     <div class="inner">
       <p class="section-label">Philosophy</p>
@@ -344,19 +294,10 @@
     </div>
   </section>
 
-  <!-- CONTACT -->
-  <section id="contact">
-    <div class="inner">
-      <p class="section-label">Get in touch</p>
-      <h2>Let's work<br><em>together.</em></h2>
-      <p>Open to conversations about research leadership, design strategy, and the messier problems worth solving.</p>
-      <div class="contact-links">
-        <a class="contact-link" href="/cdn-cgi/l/email-protection#066e636a6a6946756768676f7764676a2865696b">Email</a>
-        <a class="contact-link" href="https://linkedin.com/in/sanaiqbal" target="_blank">LinkedIn</a>
-      </div>
-    </div>
-  </section>
-
   <footer>
-    <span>© 2026 Sana Iqbal-Khan</span>
-    <span>Research · Strategy · Sy
+    <span>2026 Sana Iqbal-Khan</span>
+    <span>Research · Strategy · Systems</span>
+  </footer>
+
+</body>
+</html>
