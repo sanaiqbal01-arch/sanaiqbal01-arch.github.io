@@ -1,309 +1,1712 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sana Iqbal-Khan</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --ink:   #1a1714;
-      --warm:  #f5f0e8;
-      --sand:  #e8dfd0;
-      --clay:  #b5895a;
-      --muted: #7a6e63;
-      --rule:  #d6cfc4;
-    }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--warm);
-      color: var(--ink);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      font-size: 16px;
-      line-height: 1.7;
-      overflow-x: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey Map Editor</title>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e2e0da;
+    --border-strong: #c8c5bc;
+    --text: #1a1916;
+    --text-muted: #6b6860;
+    --text-hint: #9b9890;
+    --accent: #185FA5;
+    --accent-light: #E6F1FB;
+    --accent-dark: #0C447C;
+    --lane-colors: #E6F1FB,#EAF3DE,#FAEEDA,#FBEAF0,#EEEDFE,#E1F5EE,#FAECE7;
+    --lane-text-colors: #185FA5,#3B6D11,#854F0B,#993556,#534AB7,#0F6E56,#993C1D;
+    --phase-colors: #EEEDFE,#E1F5EE,#FAEEDA,#FAECE7,#E6F1FB,#EAF3DE;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.06);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --font: 'DM Sans', -apple-system, sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  
+  /* TOP BAR */
+  #topbar {
+    height: 52px; background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; z-index: 100;
+  }
+  #topbar .logo { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
+  #topbar .logo span { color: var(--accent); }
+  #topbar .sep { width: 1px; height: 24px; background: var(--border); }
+  .tb-btn {
+    height: 32px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface); color: var(--text); font-size: 13px; font-family: var(--font);
+    cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .tb-btn:hover { background: var(--bg); border-color: var(--border-strong); }
+  .tb-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tb-btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+  .tb-btn.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent-dark); }
+  #topbar .spacer { flex: 1; }
+  .tool-group { display: flex; gap: 4px; }
+  
+  /* MAIN LAYOUT */
+  #main { display: flex; flex: 1; overflow: hidden; }
+  
+  /* LEFT PANEL */
+  #panel {
+    width: 320px; background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
+  }
+  #panel-tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .p-tab {
+    flex: 1; padding: 10px 0; font-size: 12px; font-weight: 500; text-align: center;
+    cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .p-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .panel-section { flex: 1; overflow-y: auto; padding: 16px; display: none; }
+  .panel-section.active { display: block; }
+  
+  textarea.transcript-input {
+    width: 100%; height: 160px; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 10px; font-size: 12px; font-family: var(--font-mono); resize: vertical;
+    background: var(--bg); color: var(--text); line-height: 1.5;
+    transition: border-color 0.12s;
+  }
+  textarea.transcript-input:focus { outline: none; border-color: var(--accent); }
+  
+  .upload-zone {
+    border: 1.5px dashed var(--border-strong); border-radius: var(--radius); padding: 20px;
+    text-align: center; cursor: pointer; color: var(--text-muted); font-size: 12px;
+    transition: all 0.12s; margin-bottom: 12px;
+  }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .upload-zone .icon { font-size: 24px; margin-bottom: 6px; }
+  
+  .transcript-list { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
+  .transcript-item {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 8px 10px; display: flex; align-items: center; gap: 8px; font-size: 12px;
+  }
+  .transcript-item .name { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .transcript-item .del { color: var(--text-hint); cursor: pointer; font-size: 14px; }
+  .transcript-item .del:hover { color: #E24B4A; }
+  
+  .label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .form-row { margin-bottom: 12px; }
+  .form-input {
+    width: 100%; height: 32px; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 0 10px; font-size: 13px; font-family: var(--font); background: var(--surface); color: var(--text);
+  }
+  .form-input:focus { outline: none; border-color: var(--accent); }
+  
+  #parse-btn {
+    width: 100%; height: 36px; background: var(--accent); color: #fff; border: none;
+    border-radius: var(--radius); font-size: 13px; font-weight: 500; font-family: var(--font);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.12s; margin-top: 8px;
+  }
+  #parse-btn:hover { background: var(--accent-dark); }
+  #parse-btn:disabled { opacity: 0.6; cursor: default; }
+  
+  .status-msg {
+    font-size: 12px; color: var(--text-muted); text-align: center; padding: 8px 0;
+    display: none;
+  }
+  .status-msg.visible { display: block; }
+  .status-msg.error { color: #E24B4A; }
+  
+  /* Properties panel */
+  .prop-section { margin-bottom: 16px; }
+  .prop-section .label { margin-bottom: 8px; }
+  .color-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .color-swatch { width: 24px; height: 24px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; }
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.selected { border-color: var(--text); }
+  
+  /* CANVAS AREA */
+  #canvas-wrap { flex: 1; overflow: hidden; position: relative; cursor: default; }
+  #canvas { display: block; }
+  
+  /* CONTEXT MENU */
+  #ctx-menu {
+    position: fixed; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-lg); min-width: 160px;
+    z-index: 1000; display: none; overflow: hidden;
+  }
+  .ctx-item {
+    padding: 8px 14px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: background 0.1s;
+  }
+  .ctx-item:hover { background: var(--bg); }
+  .ctx-item.danger:hover { background: #FCEBEB; color: #E24B4A; }
+  .ctx-sep { height: 1px; background: var(--border); margin: 2px 0; }
+  
+  /* INLINE EDITOR */
+  #inline-editor {
+    position: fixed; display: none; z-index: 500;
+    background: var(--surface); border: 2px solid var(--accent);
+    border-radius: var(--radius); box-shadow: var(--shadow-lg);
+    padding: 6px 8px; min-width: 120px;
+  }
+  #inline-editor textarea {
+    border: none; outline: none; background: transparent; font-family: var(--font);
+    font-size: 12px; color: var(--text); resize: none; width: 100%; line-height: 1.4;
+  }
+  
+  /* Spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
 
-    /* NAV */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem 4rem;
-      background: rgba(245, 240, 232, 0.92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--rule);
-    }
-    .nav-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.1rem;
-      font-weight: 400;
-      letter-spacing: 0.08em;
-      text-decoration: none;
-      color: var(--ink);
-    }
-    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
-    .nav-links a {
-      text-decoration: none;
-      color: var(--muted);
-      font-size: 0.8rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      transition: color 0.25s;
-    }
-    .nav-links a:hover { color: var(--clay); }
+  /* Mini toolbar floating */
+  #mini-toolbar {
+    position: fixed; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-lg); display: none;
+    align-items: center; gap: 2px; padding: 4px; z-index: 200;
+  }
+  .mt-btn {
+    width: 28px; height: 28px; border: none; border-radius: 6px; background: transparent;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--text-muted); transition: background 0.1s, color 0.1s;
+  }
+  .mt-btn:hover { background: var(--bg); color: var(--text); }
+  .mt-btn.danger:hover { background: #FCEBEB; color: #E24B4A; }
+  
+  /* Hint */
+  #hint { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(26,25,22,0.85); color: #fff; font-size: 12px; padding: 6px 14px; border-radius: 20px; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 50; }
+  #hint.show { opacity: 1; }
 
-    /* HERO */
-    #hero {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      padding: 8rem 4rem 4rem;
-      gap: 4rem;
-    }
-    .hero-text { max-width: 520px; }
-    .hero-eyebrow {
-      font-size: 0.72rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--clay);
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .hero-eyebrow::before {
-      content: '';
-      display: block;
-      width: 2rem;
-      height: 1px;
-      background: var(--clay);
-    }
-    h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3rem, 6vw, 5.5rem);
-      font-weight: 300;
-      line-height: 1.08;
-      letter-spacing: -0.01em;
-      margin-bottom: 1.5rem;
-    }
-    h1 em { font-style: italic; color: var(--clay); }
-    .hero-desc {
-      font-size: 1.05rem;
-      color: var(--muted);
-      max-width: 420px;
-      line-height: 1.8;
-    }
-    .hero-image {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .portrait-frame {
-      width: min(380px, 100%);
-      aspect-ratio: 3/4;
-      background: var(--sand);
-      border-radius: 2px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(26, 23, 20, 0.12);
-    }
-    .portrait-frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center top;
-      display: block;
-    }
-    .portrait-tag {
-      position: absolute;
-      bottom: 0; right: 0;
-      background: var(--clay);
-      color: var(--warm);
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 0.6rem 1rem;
-    }
-
-    /* SHARED */
-    .section-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--clay);
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .section-label::after {
-      content: '';
-      width: 2rem;
-      height: 1px;
-      background: var(--clay);
-    }
-    h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      font-weight: 300;
-      line-height: 1.2;
-    }
-
-    /* ABOUT */
-    #about {
-      background: var(--ink);
-      color: var(--warm);
-      padding: 7rem 4rem;
-    }
-    #about .inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1.4fr;
-      gap: 6rem;
-      align-items: start;
-    }
-    #about .section-label { color: #d4a96a; }
-    #about .section-label::after { background: #d4a96a; }
-    #about h2 { color: var(--warm); }
-    .about-body p {
-      color: rgba(245, 240, 232, 0.72);
-      margin-bottom: 1.25rem;
-      font-size: 1.05rem;
-      line-height: 1.85;
-    }
-    .about-body p strong { color: var(--warm); font-weight: 400; }
-    .about-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2rem; }
-    .tag {
-      border: 1px solid rgba(245, 240, 232, 0.18);
-      color: rgba(245, 240, 232, 0.5);
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.35rem 0.85rem;
-      border-radius: 100px;
-    }
-
-    /* PHILOSOPHY */
-    #philosophy { padding: 7rem 4rem; text-align: center; }
-    #philosophy .inner { max-width: 720px; margin: 0 auto; }
-    #philosophy .section-label { justify-content: center; }
-    #philosophy .section-label::after { display: none; }
-    .philosophy-quote {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.5rem, 3vw, 2.4rem);
-      font-weight: 300;
-      font-style: italic;
-      line-height: 1.45;
-      color: var(--ink);
-      margin: 1.5rem 0;
-    }
-
-    /* FOOTER */
-    footer {
-      background: var(--ink);
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem 4rem;
-      font-size: 0.75rem;
-      letter-spacing: 0.08em;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 860px) {
-      nav { padding: 1.25rem 2rem; }
-      #hero { grid-template-columns: 1fr; padding: 7rem 2rem 4rem; min-height: auto; gap: 3rem; }
-      .hero-image { order: -1; }
-      .portrait-frame { width: min(240px, 70vw); aspect-ratio: 1/1; border-radius: 50%; }
-      #about { padding: 5rem 2rem; }
-      #about .inner { grid-template-columns: 1fr; gap: 2.5rem; }
-      #philosophy { padding: 5rem 2rem; }
-      footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem 2rem; }
-    }
-  </style>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-R34P23QZKW"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-R34P23QZKW');
-  </script>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400&display=swap');
+</style>
 </head>
 <body>
 
-  <nav>
-    <a class="nav-logo" href="#">Sana Iqbal-Khan</a>
-    <ul class="nav-links">
-      <li><a href="#about">About</a></li>
-      <li><a href="https://www.linkedin.com/in/sana-iqbal-01" target="_blank">Contact</a></li>
-    </ul>
-  </nav>
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">Journey<span>Map</span></div>
+  <div class="sep"></div>
+  <div class="tool-group">
+    <button class="tb-btn active" id="tool-select" title="Select (V)">&#9654; Select</button>
+    <button class="tb-btn" id="tool-connect" title="Connect (C)">&#8594; Connect</button>
+    <button class="tb-btn" id="tool-phase" title="Add Phase (P)">&#9646; Phase</button>
+  </div>
+  <div class="sep"></div>
+  <button class="tb-btn" id="btn-add-step">+ Step</button>
+  <button class="tb-btn" id="btn-add-lane">+ Lane</button>
+  <div class="spacer"></div>
+  <button class="tb-btn" id="btn-zoom-out">−</button>
+  <button class="tb-btn" id="btn-zoom-fit">Fit</button>
+  <button class="tb-btn" id="btn-zoom-in">+</button>
+  <div class="sep"></div>
+  <button class="tb-btn" id="btn-export">Export SVG</button>
+</div>
 
-  <section id="hero">
-    <div class="hero-text">
-      <p class="hero-eyebrow">Research · Strategy · Systems</p>
-      <h1>Bringing clarity<br>to <em>complex</em><br>problems.</h1>
-      <p class="hero-desc">
-        I work at the intersection of user-centered research and digital experience design — helping organizations de-risk the decisions that matter most.
-      </p>
+<!-- MAIN -->
+<div id="main">
+  <!-- LEFT PANEL -->
+  <div id="panel">
+    <div id="panel-tabs">
+      <div class="p-tab active" data-tab="import">Import</div>
+      <div class="p-tab" data-tab="properties">Properties</div>
+      <div class="p-tab" data-tab="structure">Structure</div>
     </div>
-    <div class="hero-image">
-      <div class="portrait-frame">
-        <img src="headshot.jpeg" alt="Sana Iqbal-Khan" />
-        <span class="portrait-tag">New York</span>
-      </div>
-    </div>
-  </section>
-
-  <section id="about">
-    <div class="inner">
-      <div>
-        <p class="section-label">About</p>
-        <h2>Researcher.<br>Strategist.<br>Sense-maker.</h2>
-      </div>
-      <div class="about-body">
-        <p>
-          My practice is rooted in <strong>design research &amp; strategy, participatory design, and systems thinking</strong>. Grounded in getting close to real human experience, then building the frameworks that help institutions act on what they learn.
-        </p>
-        <p>
-          I'm drawn to ambiguous, high-stakes problems: the kind that sit at the edge of what an organization knows how to do — and translating findings into <strong>strategy and storytelling</strong> that help them move forward.
-        </p>
-        <div class="about-tags">
-          <span class="tag">User Research</span>
-          <span class="tag">Prototyping</span>
-          <span class="tag">Stakeholder Management</span>
-          <span class="tag">Systems Design</span>
-          <span class="tag">Digital Transformation</span>
+    
+    <!-- IMPORT TAB -->
+    <div class="panel-section active" id="tab-import">
+      <div class="form-row">
+        <div class="label">API Key</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input class="form-input" type="password" id="api-key-input" placeholder="sk-ant-..." style="flex:1;" oninput="handleApiKeyInput()">
+          <span id="api-key-saved" style="font-size:11px;color:#3B6D11;font-weight:500;display:none;">✓ saved</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+          <input type="checkbox" id="save-key-cb" onchange="handleSaveKeyCb()" style="cursor:pointer;">
+          <label for="save-key-cb" style="font-size:11px;color:var(--text-muted);cursor:pointer;">Remember in this browser</label>
+          <button id="clear-key-btn" onclick="clearApiKey()" style="display:none;margin-left:auto;font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--text-muted);">Clear</button>
         </div>
       </div>
+      <div class="form-row">
+        <div class="label">Paste transcript</div>
+        <textarea class="transcript-input" id="transcript-input" placeholder="Paste interview transcript, meeting notes, or user story here..."></textarea>
+        <button style="margin-top:6px;width:100%;height:28px;font-size:12px;font-family:var(--font);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;" onclick="addTranscript()">Add Transcript</button>
+      </div>
+      <div class="form-row">
+        <div class="label">Or upload files</div>
+        <div class="upload-zone" id="upload-zone">
+          <div class="icon">&#128196;</div>
+          <div>Drop .txt or .md files here<br>or click to browse</div>
+          <input type="file" id="file-input" accept=".txt,.md,.text" multiple style="display:none">
+        </div>
+      </div>
+      <div class="transcript-list" id="transcript-list"></div>
+      <div class="sep" style="height:1px;background:var(--border);margin:8px 0;"></div>
+      <div class="form-row">
+        <div class="label">Journey title</div>
+        <input class="form-input" id="journey-title" placeholder="e.g. Onboarding Experience" value="Customer Journey">
+      </div>
+      <button id="parse-btn" onclick="parseTranscripts()">
+        <span id="parse-label">&#10024; Generate Journey Map</span>
+        <div class="spinner" id="parse-spinner" style="display:none"></div>
+      </button>
+      <div class="status-msg" id="status-msg"></div>
     </div>
-  </section>
-
-  <section id="philosophy">
-    <div class="inner">
-      <p class="section-label">Philosophy</p>
-      <p class="philosophy-quote">
-        "The goal isn't just better research. It's creating the conditions for insight to drive action."
-      </p>
+    
+    <!-- PROPERTIES TAB -->
+    <div class="panel-section" id="tab-properties">
+      <div id="no-selection" style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px 0;">
+        Select a step, lane, or phase<br>to edit its properties
+      </div>
+      <div id="step-props" style="display:none">
+        <div class="prop-section">
+          <div class="label">Step label</div>
+          <textarea class="form-input" id="prop-step-label" style="height:64px;padding:6px 10px;resize:none;" oninput="updateSelectedLabel()"></textarea>
+        </div>
+        <div class="prop-section">
+          <div class="label">Color</div>
+          <div class="color-grid" id="step-color-grid"></div>
+        </div>
+        <div class="prop-section">
+          <div class="label">Sublane / Lane</div>
+          <select class="form-input" id="prop-step-lane" onchange="updateSelectedLane()"></select>
+        </div>
+        <button class="tb-btn danger" style="width:100%;justify-content:center;border-color:#F0959;color:#E24B4A;margin-top:8px;" onclick="deleteSelected()">Delete step</button>
+      </div>
+      <div id="lane-props" style="display:none">
+        <div class="prop-section">
+          <div class="label">Lane name</div>
+          <input class="form-input" id="prop-lane-name" oninput="updateLaneName()">
+        </div>
+        <div class="prop-section">
+          <div class="label">Color</div>
+          <div class="color-grid" id="lane-color-grid"></div>
+        </div>
+        <button class="tb-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="deleteSelectedLane()">Delete lane</button>
+      </div>
+      <div id="phase-props" style="display:none">
+        <div class="prop-section">
+          <div class="label">Phase name</div>
+          <input class="form-input" id="prop-phase-name" oninput="updatePhaseName()">
+        </div>
+        <div class="prop-section">
+          <div class="label">Color</div>
+          <div class="color-grid" id="phase-color-grid"></div>
+        </div>
+        <button class="tb-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="deleteSelectedPhase()">Delete phase</button>
+      </div>
     </div>
-  </section>
+    
+    <!-- STRUCTURE TAB -->
+    <div class="panel-section" id="tab-structure">
+      <div id="structure-list" style="font-size:12px;"></div>
+    </div>
+  </div>
+  
+  <!-- CANVAS -->
+  <div id="canvas-wrap">
+    <canvas id="canvas"></canvas>
+  </div>
+</div>
 
-  <footer>
-    <span>2026 Sana Iqbal-Khan</span>
-    <span>Research · Strategy · Systems</span>
-  </footer>
+<!-- CONTEXT MENU -->
+<div id="ctx-menu">
+  <div class="ctx-item" id="ctx-edit">&#9998; Edit text</div>
+  <div class="ctx-item" id="ctx-duplicate">&#10697; Duplicate</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" id="ctx-add-before">&#8592; Add step before</div>
+  <div class="ctx-item" id="ctx-add-after">&#8594; Add step after</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" id="ctx-delete">&#128465; Delete</div>
+</div>
 
+<!-- INLINE EDITOR -->
+<div id="inline-editor">
+  <textarea id="inline-text" rows="2"></textarea>
+</div>
+
+<!-- MINI TOOLBAR -->
+<div id="mini-toolbar">
+  <button class="mt-btn" id="mt-edit" title="Edit">&#9998;</button>
+  <button class="mt-btn" id="mt-duplicate" title="Duplicate">&#10697;</button>
+  <button class="mt-btn danger" id="mt-delete" title="Delete">&#128465;</button>
+</div>
+
+<div id="hint"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const LANE_COLORS = ['#E6F1FB','#EAF3DE','#FAEEDA','#FBEAF0','#EEEDFE','#E1F5EE','#FAECE7','#F1EFE8'];
+const LANE_BORDER = ['#185FA5','#3B6D11','#854F0B','#993556','#534AB7','#0F6E56','#993C1D','#5F5E5A'];
+const STEP_COLORS = ['#B5D4F4','#C0DD97','#FAC775','#F4C0D1','#CECBF6','#9FE1CB','#F5C4B3','#D3D1C7'];
+const STEP_TEXT =   ['#0C447C','#27500A','#633806','#72243E','#3C3489','#085041','#712B13','#444441'];
+const PHASE_COLORS = ['#EEEDFE','#E1F5EE','#FAEEDA','#FAECE7','#E6F1FB','#EAF3DE','#F1EFE8'];
+const PHASE_BORDERS = ['#534AB7','#0F6E56','#854F0B','#993556','#185FA5','#3B6D11','#5F5E5A'];
+
+let state = {
+  lanes: [],      // [{id, name, color, borderColor}]
+  steps: [],      // [{id, label, laneId, x, y, w, h, color, textColor, phaseId}]
+  connectors: [], // [{id, fromId, toId, fromEdge, toEdge, label}]
+  phases: [],     // [{id, name, x, w, color, borderColor}]
+  nextId: 1,
+  viewX: 60,
+  viewY: 60,
+  zoom: 1,
+  selectedId: null,
+  selectedType: null, // 'step'|'lane'|'phase'|'connector'
+  tool: 'select',
+  connectFrom: null,
+  connectFromEdge: null,
+  transcripts: [],
+  phaseMode: false,
+  phaseStart: null,
+};
+
+// ============================================================
+// CANVAS SETUP
+// ============================================================
+const canvas = document.getElementById('canvas');
+const ctx2d = canvas.getContext('2d');
+const wrap = document.getElementById('canvas-wrap');
+
+const STEP_W = 140, STEP_H = 64;
+const LANE_HEADER_W = 120;
+const LANE_H = 110;
+const PHASE_HEADER_H = 32;
+const CONNECTOR_COLOR = '#888780';
+const GRID_SIZE = 20;
+
+function resize() {
+  const w = wrap.clientWidth || wrap.offsetWidth || window.innerWidth - 320;
+  const h = wrap.clientHeight || wrap.offsetHeight || window.innerHeight - 52;
+  if (w > 0 && h > 0) {
+    canvas.width = w;
+    canvas.height = h;
+    draw();
+  }
+}
+window.addEventListener('resize', resize);
+
+// ============================================================
+// UTILS
+// ============================================================
+let idCounter = 1;
+function uid() { return 'n' + (idCounter++); }
+
+function showHint(msg, dur=2000) {
+  const h = document.getElementById('hint');
+  h.textContent = msg;
+  h.classList.add('show');
+  clearTimeout(h._t);
+  h._t = setTimeout(() => h.classList.remove('show'), dur);
+}
+
+// ============================================================
+// API KEY MANAGEMENT
+// ============================================================
+const API_KEY_STORAGE = 'journey_map_api_key';
+
+function getApiKey() {
+  return document.getElementById('api-key-input').value.trim() || localStorage.getItem(API_KEY_STORAGE) || '';
+}
+
+function handleApiKeyInput() {
+  if (document.getElementById('save-key-cb').checked) {
+    const key = document.getElementById('api-key-input').value.trim();
+    if (key) localStorage.setItem(API_KEY_STORAGE, key);
+  }
+}
+
+function handleSaveKeyCb() {
+  const checked = document.getElementById('save-key-cb').checked;
+  const key = document.getElementById('api-key-input').value.trim();
+  if (checked && key) {
+    localStorage.setItem(API_KEY_STORAGE, key);
+    document.getElementById('api-key-saved').style.display = 'inline';
+    document.getElementById('clear-key-btn').style.display = 'inline';
+  } else if (!checked) {
+    localStorage.removeItem(API_KEY_STORAGE);
+    document.getElementById('api-key-saved').style.display = 'none';
+    document.getElementById('clear-key-btn').style.display = 'none';
+  }
+}
+
+function clearApiKey() {
+  localStorage.removeItem(API_KEY_STORAGE);
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('save-key-cb').checked = false;
+  document.getElementById('api-key-saved').style.display = 'none';
+  document.getElementById('clear-key-btn').style.display = 'none';
+}
+
+function initApiKey() {
+  const saved = localStorage.getItem(API_KEY_STORAGE);
+  if (saved) {
+    document.getElementById('api-key-input').value = saved;
+    document.getElementById('save-key-cb').checked = true;
+    document.getElementById('api-key-saved').style.display = 'inline';
+    document.getElementById('clear-key-btn').style.display = 'inline';
+  }
+}
+
+// ============================================================
+// TRANSCRIPT MANAGEMENT
+// ============================================================
+let transcriptCounter = 0;
+function addTranscript() {
+  const ta = document.getElementById('transcript-input');
+  const text = ta.value.trim();
+  if (!text) return;
+  transcriptCounter++;
+  state.transcripts.push({ id: uid(), name: `Transcript ${transcriptCounter}`, text });
+  ta.value = '';
+  renderTranscriptList();
+}
+
+document.getElementById('upload-zone').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', e => {
+  Array.from(e.target.files).forEach(f => {
+    const r = new FileReader();
+    r.onload = ev => {
+      state.transcripts.push({ id: uid(), name: f.name, text: ev.target.result });
+      renderTranscriptList();
+    };
+    r.readAsText(f);
+  });
+  e.target.value = '';
+});
+
+const uz = document.getElementById('upload-zone');
+uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag'); });
+uz.addEventListener('dragleave', () => uz.classList.remove('drag'));
+uz.addEventListener('drop', e => {
+  e.preventDefault(); uz.classList.remove('drag');
+  Array.from(e.dataTransfer.files).forEach(f => {
+    if (!f.name.match(/\.(txt|md|text)$/i)) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      state.transcripts.push({ id: uid(), name: f.name, text: ev.target.result });
+      renderTranscriptList();
+    };
+    r.readAsText(f);
+  });
+});
+
+function renderTranscriptList() {
+  const el = document.getElementById('transcript-list');
+  el.innerHTML = state.transcripts.map(t => `
+    <div class="transcript-item">
+      <span>&#128196;</span>
+      <span class="name" title="${t.name}">${t.name}</span>
+      <span class="del" onclick="removeTranscript('${t.id}')">&#10005;</span>
+    </div>
+  `).join('');
+}
+
+function removeTranscript(id) {
+  state.transcripts = state.transcripts.filter(t => t.id !== id);
+  renderTranscriptList();
+}
+
+// ============================================================
+// AI PARSING
+// ============================================================
+async function parseTranscripts() {
+  const apiKey = getApiKey();
+  if (!apiKey) { showStatus('Enter your Anthropic API key first.', true); return; }
+  const combined = state.transcripts.map(t => `=== ${t.name} ===\n${t.text}`).join('\n\n');
+  if (!combined.trim()) { showStatus('Add at least one transcript first.', true); return; }
+
+  const title = document.getElementById('journey-title').value || 'Journey';
+  setParseLoading(true);
+  showStatus('Analyzing transcripts…');
+
+  const systemPrompt = `You are a UX research analyst. Extract a journey map from transcripts.
+Return ONLY valid JSON, no markdown, no explanation. Format:
+{
+  "lanes": [{"name":"PersonaOrTeamName"}],
+  "steps": [{"label":"Step text (max 8 words)","lane":0,"phase":"Phase Name"}],
+  "connections": [{"from":0,"to":1}],
+  "phases": ["Phase Name 1","Phase Name 2"]
+}
+Rules:
+- lanes = distinct personas, roles, or teams mentioned
+- steps = key actions/touchpoints, ordered left to right within each lane
+- connections = sequential flow between steps (from/to are step indices)
+- phases = high-level stages that group steps (use 2-5 phases)
+- Each step belongs to one lane (0-indexed)
+- Keep labels concise (max 8 words)
+- Extract 4-12 steps total, 2-5 lanes`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey(), 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: `Journey title: ${title}\n\n${combined}` }]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    buildFromParsed(parsed, title);
+    showStatus('Journey map generated!');
+    switchTab('structure');
+  } catch(e) {
+    console.error(e);
+    showStatus('Parse failed. Check console or try again.', true);
+  } finally {
+    setParseLoading(false);
+  }
+}
+
+function setParseLoading(v) {
+  document.getElementById('parse-btn').disabled = v;
+  document.getElementById('parse-label').style.display = v ? 'none' : '';
+  document.getElementById('parse-spinner').style.display = v ? 'block' : 'none';
+}
+
+function showStatus(msg, isErr) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status-msg visible' + (isErr ? ' error' : '');
+  if (!isErr) setTimeout(() => el.classList.remove('visible'), 3000);
+}
+
+function buildFromParsed(parsed, title) {
+  state.lanes = [];
+  state.steps = [];
+  state.connectors = [];
+  state.phases = [];
+  idCounter = 1;
+
+  // Create lanes
+  parsed.lanes.forEach((l, i) => {
+    state.lanes.push({
+      id: uid(), name: l.name,
+      color: LANE_COLORS[i % LANE_COLORS.length],
+      borderColor: LANE_BORDER[i % LANE_BORDER.length]
+    });
+  });
+
+  // Create phases
+  const phaseNames = parsed.phases || [];
+  const phaseMap = {};
+  phaseNames.forEach((p, i) => {
+    const ph = {
+      id: uid(), name: p,
+      x: 0, w: 0,
+      color: PHASE_COLORS[i % PHASE_COLORS.length],
+      borderColor: PHASE_BORDERS[i % PHASE_BORDERS.length]
+    };
+    state.phases.push(ph);
+    phaseMap[p] = ph.id;
+  });
+
+  // Layout steps
+  // Group by lane, then position
+  const laneCounts = {};
+  parsed.steps.forEach(s => { laneCounts[s.lane] = (laneCounts[s.lane]||0)+1; });
+  const laneX = {};
+  state.lanes.forEach((l,i) => { laneX[i] = 0; });
+
+  const startX = LANE_HEADER_W + 30;
+  const stepXSpacing = STEP_W + 36;
+  const stepsPerRow = {};
+  parsed.steps.forEach((s, idx) => {
+    const laneIdx = s.lane || 0;
+    const col = stepsPerRow[laneIdx] || 0;
+    stepsPerRow[laneIdx] = col + 1;
+    const laneId = state.lanes[laneIdx]?.id || state.lanes[0].id;
+    const y = PHASE_HEADER_H + laneIdx * LANE_H + (LANE_H - STEP_H) / 2;
+    const x = startX + col * stepXSpacing;
+    const colorIdx = laneIdx % STEP_COLORS.length;
+    state.steps.push({
+      id: uid(), label: s.label, laneId,
+      x, y, w: STEP_W, h: STEP_H,
+      color: STEP_COLORS[colorIdx],
+      textColor: STEP_TEXT[colorIdx],
+      phaseId: phaseMap[s.phase] || null,
+      origIdx: idx
+    });
+  });
+
+  // Create connectors
+  (parsed.connections || []).forEach(c => {
+    const from = state.steps[c.from];
+    const to = state.steps[c.to];
+    if (from && to) {
+      state.connectors.push({
+        id: uid(), fromId: from.id, toId: to.id,
+        fromEdge: 'right', toEdge: 'left', label: ''
+      });
+    }
+  });
+
+  // Auto-assign phases by column range
+  if (state.phases.length > 0) {
+    const allX = state.steps.map(s => s.x);
+    const minX = Math.min(...allX);
+    const maxX = Math.max(...allX);
+    const range = maxX - minX || 1;
+    state.phases.forEach((ph, i) => {
+      const frac = state.phases.length;
+      ph.x = LANE_HEADER_W + 10 + (i / frac) * (range + STEP_W + 40);
+      ph.w = (range + STEP_W + 40) / frac;
+    });
+  }
+
+  state.selectedId = null;
+  state.selectedType = null;
+  fitView();
+  renderStructure();
+  draw();
+}
+
+// ============================================================
+// DRAWING
+// ============================================================
+function draw() {
+  const W = canvas.width, H = canvas.height;
+  ctx2d.clearRect(0, 0, W, H);
+  ctx2d.save();
+  
+  // Grid
+  ctx2d.strokeStyle = '#e8e6e0';
+  ctx2d.lineWidth = 0.5;
+  const gx = (state.viewX % (GRID_SIZE * state.zoom));
+  const gy = (state.viewY % (GRID_SIZE * state.zoom));
+  for (let x = gx; x < W; x += GRID_SIZE * state.zoom) { ctx2d.beginPath(); ctx2d.moveTo(x,0); ctx2d.lineTo(x,H); ctx2d.stroke(); }
+  for (let y = gy; y < H; y += GRID_SIZE * state.zoom) { ctx2d.beginPath(); ctx2d.moveTo(0,y); ctx2d.lineTo(W,y); ctx2d.stroke(); }
+  
+  ctx2d.translate(state.viewX, state.viewY);
+  ctx2d.scale(state.zoom, state.zoom);
+
+  drawPhases();
+  drawLanes();
+  drawConnectors();
+  drawSteps();
+  
+  ctx2d.restore();
+}
+
+function worldToScreen(x, y) {
+  return { x: x * state.zoom + state.viewX, y: y * state.zoom + state.viewY };
+}
+function screenToWorld(x, y) {
+  return { x: (x - state.viewX) / state.zoom, y: (y - state.viewY) / state.zoom };
+}
+
+function getTotalW() {
+  if (!state.steps.length) return 800;
+  return Math.max(...state.steps.map(s => s.x + s.w)) + 80;
+}
+function getTotalH() {
+  return PHASE_HEADER_H + state.lanes.length * LANE_H + 20;
+}
+
+function drawPhases() {
+  const totalH = getTotalH();
+  state.phases.forEach(ph => {
+    const isSelected = state.selectedId === ph.id && state.selectedType === 'phase';
+    // Background
+    ctx2d.fillStyle = ph.color + '66';
+    ctx2d.beginPath();
+    roundRect(ctx2d, ph.x, 0, ph.w, totalH, 6);
+    ctx2d.fill();
+    // Border
+    ctx2d.strokeStyle = isSelected ? ph.borderColor : ph.borderColor + '88';
+    ctx2d.lineWidth = isSelected ? 2 : 1;
+    ctx2d.setLineDash(isSelected ? [] : [5,3]);
+    ctx2d.beginPath();
+    roundRect(ctx2d, ph.x, 0, ph.w, totalH, 6);
+    ctx2d.stroke();
+    ctx2d.setLineDash([]);
+    // Header
+    ctx2d.fillStyle = ph.borderColor;
+    ctx2d.beginPath();
+    roundRect(ctx2d, ph.x, 0, ph.w, PHASE_HEADER_H, 6);
+    ctx2d.fill();
+    ctx2d.fillStyle = '#fff';
+    ctx2d.font = `500 11px 'DM Sans', sans-serif`;
+    ctx2d.textAlign = 'center';
+    ctx2d.fillText(ph.name, ph.x + ph.w / 2, 20, ph.w - 12);
+  });
+}
+
+function drawLanes() {
+  const totalW = getTotalW();
+  state.lanes.forEach((lane, i) => {
+    const y = PHASE_HEADER_H + i * LANE_H;
+    const isSelected = state.selectedId === lane.id && state.selectedType === 'lane';
+    // Lane background
+    ctx2d.fillStyle = lane.color + '55';
+    ctx2d.fillRect(LANE_HEADER_W, y, totalW - LANE_HEADER_W, LANE_H);
+    // Lane header
+    ctx2d.fillStyle = isSelected ? lane.color : lane.color + 'cc';
+    ctx2d.beginPath();
+    roundRect(ctx2d, 0, y, LANE_HEADER_W, LANE_H, 6);
+    ctx2d.fill();
+    ctx2d.strokeStyle = isSelected ? lane.borderColor : lane.borderColor + '55';
+    ctx2d.lineWidth = isSelected ? 2 : 1;
+    ctx2d.beginPath();
+    roundRect(ctx2d, 0, y, LANE_HEADER_W, LANE_H, 6);
+    ctx2d.stroke();
+    // Lane separator
+    ctx2d.strokeStyle = lane.borderColor + '33';
+    ctx2d.lineWidth = 1;
+    ctx2d.beginPath(); ctx2d.moveTo(0, y + LANE_H); ctx2d.lineTo(totalW, y + LANE_H); ctx2d.stroke();
+    // Lane name (rotated)
+    ctx2d.save();
+    ctx2d.translate(LANE_HEADER_W / 2, y + LANE_H / 2);
+    ctx2d.fillStyle = lane.borderColor;
+    ctx2d.font = `500 13px 'DM Sans', sans-serif`;
+    ctx2d.textAlign = 'center';
+    ctx2d.fillText(lane.name, 0, 5, LANE_H - 16);
+    ctx2d.restore();
+  });
+  // Left edge border
+  ctx2d.strokeStyle = '#c8c5bc';
+  ctx2d.lineWidth = 1;
+  ctx2d.beginPath();
+  ctx2d.rect(0, PHASE_HEADER_H, totalW, state.lanes.length * LANE_H);
+  ctx2d.stroke();
+}
+
+function getEdgePoint(step, edge) {
+  switch (edge) {
+    case 'right':  return { x: step.x + step.w, y: step.y + step.h / 2 };
+    case 'left':   return { x: step.x, y: step.y + step.h / 2 };
+    case 'bottom': return { x: step.x + step.w / 2, y: step.y + step.h };
+    case 'top':    return { x: step.x + step.w / 2, y: step.y };
+  }
+}
+
+function drawConnectors() {
+  state.connectors.forEach(conn => {
+    const from = state.steps.find(s => s.id === conn.fromId);
+    const to = state.steps.find(s => s.id === conn.toId);
+    if (!from || !to) return;
+    const fp = getEdgePoint(from, conn.fromEdge || 'right');
+    const tp = getEdgePoint(to, conn.toEdge || 'left');
+    const isSelected = state.selectedId === conn.id && state.selectedType === 'connector';
+    const color = isSelected ? '#185FA5' : CONNECTOR_COLOR;
+    
+    ctx2d.strokeStyle = color;
+    ctx2d.lineWidth = isSelected ? 2 : 1.5;
+    ctx2d.setLineDash([]);
+    
+    // Draw bezier or step path
+    ctx2d.beginPath();
+    ctx2d.moveTo(fp.x, fp.y);
+    const dx = tp.x - fp.x;
+    const dy = tp.y - fp.y;
+    const cx1 = fp.x + Math.abs(dx) * 0.4 * (conn.fromEdge === 'right' ? 1 : conn.fromEdge === 'left' ? -1 : 0);
+    const cy1 = fp.y + Math.abs(dy) * 0.4 * (conn.fromEdge === 'bottom' ? 1 : conn.fromEdge === 'top' ? -1 : 0);
+    const cx2 = tp.x - Math.abs(dx) * 0.4 * (conn.toEdge === 'right' ? 1 : conn.toEdge === 'left' ? -1 : 0);
+    const cy2 = tp.y - Math.abs(dy) * 0.4 * (conn.toEdge === 'bottom' ? 1 : conn.toEdge === 'top' ? -1 : 0);
+    ctx2d.bezierCurveTo(cx1, cy1, cx2, cy2, tp.x, tp.y);
+    ctx2d.stroke();
+    
+    // Arrowhead at tp
+    const angle = Math.atan2(tp.y - cy2, tp.x - cx2);
+    drawArrow(tp.x, tp.y, angle, color);
+    
+    // Connector label
+    if (conn.label) {
+      const mx = (fp.x + tp.x) / 2, my = (fp.y + tp.y) / 2 - 12;
+      ctx2d.fillStyle = '#fff';
+      const tw = ctx2d.measureText(conn.label).width + 8;
+      ctx2d.fillRect(mx - tw/2, my - 9, tw, 14);
+      ctx2d.fillStyle = CONNECTOR_COLOR;
+      ctx2d.font = '10px DM Sans, sans-serif';
+      ctx2d.textAlign = 'center';
+      ctx2d.fillText(conn.label, mx, my);
+    }
+  });
+  
+  // Draw connect preview
+  if (state.connectPreview && state.connectFrom) {
+    const from = state.steps.find(s => s.id === state.connectFrom);
+    if (from) {
+      const fp = getEdgePoint(from, state.connectFromEdge || 'right');
+      ctx2d.strokeStyle = '#185FA5';
+      ctx2d.lineWidth = 1.5;
+      ctx2d.setLineDash([5,3]);
+      ctx2d.beginPath();
+      ctx2d.moveTo(fp.x, fp.y);
+      ctx2d.lineTo(state.connectPreview.x, state.connectPreview.y);
+      ctx2d.stroke();
+      ctx2d.setLineDash([]);
+    }
+  }
+}
+
+function drawArrow(x, y, angle, color) {
+  const len = 9, w = 5;
+  ctx2d.fillStyle = color;
+  ctx2d.beginPath();
+  ctx2d.moveTo(x, y);
+  ctx2d.lineTo(x - len * Math.cos(angle - 0.4), y - len * Math.sin(angle - 0.4));
+  ctx2d.lineTo(x - len * Math.cos(angle + 0.4), y - len * Math.sin(angle + 0.4));
+  ctx2d.closePath();
+  ctx2d.fill();
+}
+
+function drawSteps() {
+  state.steps.forEach(step => {
+    const isSelected = state.selectedId === step.id && state.selectedType === 'step';
+    const isConnectFrom = state.connectFrom === step.id;
+    
+    // Shadow
+    if (isSelected) {
+      ctx2d.fillStyle = 'rgba(24,95,165,0.12)';
+      roundRectFill(ctx2d, step.x - 3, step.y - 3, step.w + 6, step.h + 6, 10);
+    }
+    
+    // Body
+    ctx2d.fillStyle = step.color;
+    ctx2d.beginPath();
+    roundRect(ctx2d, step.x, step.y, step.w, step.h, 8);
+    ctx2d.fill();
+    
+    // Border
+    ctx2d.strokeStyle = isSelected ? '#185FA5' : isConnectFrom ? '#1D9E75' : step.textColor + '88';
+    ctx2d.lineWidth = isSelected || isConnectFrom ? 2 : 1;
+    ctx2d.beginPath();
+    roundRect(ctx2d, step.x, step.y, step.w, step.h, 8);
+    ctx2d.stroke();
+    
+    // Edge dots for connecting
+    if (state.tool === 'connect' || isSelected) {
+      ['left','right','top','bottom'].forEach(edge => {
+        const p = getEdgePoint(step, edge);
+        ctx2d.fillStyle = state.tool === 'connect' ? '#185FA5' : '#185FA5aa';
+        ctx2d.beginPath();
+        ctx2d.arc(p.x, p.y, 5, 0, Math.PI*2);
+        ctx2d.fill();
+        ctx2d.fillStyle = '#fff';
+        ctx2d.beginPath();
+        ctx2d.arc(p.x, p.y, 3, 0, Math.PI*2);
+        ctx2d.fill();
+      });
+    }
+    
+    // Text
+    ctx2d.fillStyle = step.textColor;
+    ctx2d.font = `500 11px 'DM Sans', sans-serif`;
+    ctx2d.textAlign = 'center';
+    wrapText(ctx2d, step.label, step.x + step.w/2, step.y + step.h/2, step.w - 16, 16);
+  });
+}
+
+function wrapText(ctx, text, cx, cy, maxW, lineH) {
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  words.forEach(w => {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
+    else line = test;
+  });
+  if (line) lines.push(line);
+  const startY = cy - (lines.length - 1) * lineH / 2;
+  lines.forEach((l, i) => ctx.fillText(l, cx, startY + i * lineH, maxW));
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+function roundRectFill(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  roundRect(ctx, x, y, w, h, r);
+  ctx.fill();
+}
+
+// ============================================================
+// HIT TESTING
+// ============================================================
+function hitTest(wx, wy) {
+  // Steps first (top layer)
+  for (let i = state.steps.length - 1; i >= 0; i--) {
+    const s = state.steps[i];
+    if (wx >= s.x && wx <= s.x + s.w && wy >= s.y && wy <= s.y + s.h)
+      return { type: 'step', id: s.id };
+  }
+  // Check edge dots
+  if (state.tool === 'connect') {
+    for (let i = state.steps.length - 1; i >= 0; i--) {
+      const s = state.steps[i];
+      for (const edge of ['left','right','top','bottom']) {
+        const p = getEdgePoint(s, edge);
+        if (Math.hypot(wx - p.x, wy - p.y) <= 8)
+          return { type: 'edge', stepId: s.id, edge };
+      }
+    }
+  }
+  // Connectors
+  for (let i = state.connectors.length - 1; i >= 0; i--) {
+    const conn = state.connectors[i];
+    if (hitTestConnector(conn, wx, wy))
+      return { type: 'connector', id: conn.id };
+  }
+  // Phases
+  for (let i = state.phases.length - 1; i >= 0; i--) {
+    const ph = state.phases[i];
+    if (wx >= ph.x && wx <= ph.x + ph.w && wy >= 0 && wy <= PHASE_HEADER_H)
+      return { type: 'phase', id: ph.id };
+    if (wx >= ph.x && wx <= ph.x + ph.w && wy >= 0 && wy <= getTotalH())
+      return { type: 'phase-body', id: ph.id };
+  }
+  // Lane header
+  for (let i = 0; i < state.lanes.length; i++) {
+    const y = PHASE_HEADER_H + i * LANE_H;
+    if (wx >= 0 && wx <= LANE_HEADER_W && wy >= y && wy <= y + LANE_H)
+      return { type: 'lane', id: state.lanes[i].id };
+  }
+  return null;
+}
+
+function hitTestConnector(conn, wx, wy) {
+  const from = state.steps.find(s => s.id === conn.fromId);
+  const to = state.steps.find(s => s.id === conn.toId);
+  if (!from || !to) return false;
+  const fp = getEdgePoint(from, conn.fromEdge || 'right');
+  const tp = getEdgePoint(to, conn.toEdge || 'left');
+  const mx = (fp.x + tp.x) / 2, my = (fp.y + tp.y) / 2;
+  return Math.hypot(wx - mx, wy - my) < 10;
+}
+
+// ============================================================
+// MOUSE / TOUCH INTERACTION
+// ============================================================
+let dragState = null;
+let isPanning = false;
+let panStart = null;
+let lastMouse = { x: 0, y: 0 };
+
+canvas.addEventListener('mousedown', onMouseDown);
+canvas.addEventListener('mousemove', onMouseMove);
+canvas.addEventListener('mouseup', onMouseUp);
+canvas.addEventListener('dblclick', onDblClick);
+canvas.addEventListener('contextmenu', onRightClick);
+canvas.addEventListener('wheel', onWheel, { passive: false });
+
+function getCanvasPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function onMouseDown(e) {
+  if (e.button === 1 || (e.button === 0 && e.altKey)) { // middle or alt+left = pan
+    isPanning = true;
+    panStart = { x: e.clientX - state.viewX, y: e.clientY - state.viewY };
+    canvas.style.cursor = 'grabbing';
+    return;
+  }
+  if (e.button !== 0) return;
+  
+  const cp = getCanvasPos(e);
+  const wp = screenToWorld(cp.x, cp.y);
+  const hit = hitTest(wp.x, wp.y);
+  
+  closeCtxMenu();
+  
+  if (state.tool === 'phase') {
+    if (!state.phaseStart) {
+      state.phaseStart = wp.x;
+    } else {
+      const x = Math.min(state.phaseStart, wp.x);
+      const w = Math.abs(wp.x - state.phaseStart);
+      if (w > 30) {
+        const ph = {
+          id: uid(), name: 'Phase',
+          x, w,
+          color: PHASE_COLORS[state.phases.length % PHASE_COLORS.length],
+          borderColor: PHASE_BORDERS[state.phases.length % PHASE_BORDERS.length]
+        };
+        state.phases.push(ph);
+        selectItem('phase', ph.id);
+        showHint('Phase added. Double-click to rename.');
+      }
+      state.phaseStart = null;
+      draw();
+    }
+    return;
+  }
+  
+  if (state.tool === 'connect') {
+    if (hit?.type === 'edge') {
+      state.connectFrom = hit.stepId;
+      state.connectFromEdge = hit.edge;
+    } else if (hit?.type === 'step' && state.connectFrom) {
+      // Complete connection
+      if (hit.id !== state.connectFrom) {
+        state.connectors.push({
+          id: uid(), fromId: state.connectFrom, toId: hit.id,
+          fromEdge: state.connectFromEdge || 'right', toEdge: 'left', label: ''
+        });
+      }
+      state.connectFrom = null;
+      state.connectFromEdge = null;
+      state.connectPreview = null;
+      draw();
+    } else {
+      state.connectFrom = null;
+      state.connectFromEdge = null;
+      state.connectPreview = null;
+    }
+    return;
+  }
+  
+  // Select tool
+  if (hit?.type === 'step') {
+    selectItem('step', hit.id);
+    const step = state.steps.find(s => s.id === hit.id);
+    dragState = { type: 'step', id: hit.id, startX: wp.x - step.x, startY: wp.y - step.y };
+  } else if (hit?.type === 'connector') {
+    selectItem('connector', hit.id);
+  } else if (hit?.type === 'phase') {
+    selectItem('phase', hit.id);
+    const ph = state.phases.find(p => p.id === hit.id);
+    dragState = { type: 'phase', id: hit.id, startX: wp.x - ph.x };
+  } else if (hit?.type === 'phase-body') {
+    selectItem('phase', hit.id);
+    const ph = state.phases.find(p => p.id === hit.id);
+    dragState = { type: 'phase-resize', id: hit.id, startX: wp.x, startW: ph.w };
+  } else if (hit?.type === 'lane') {
+    selectItem('lane', hit.id);
+  } else {
+    selectItem(null, null);
+    // Start canvas pan
+    isPanning = true;
+    panStart = { x: e.clientX - state.viewX, y: e.clientY - state.viewY };
+    canvas.style.cursor = 'grabbing';
+  }
+}
+
+function onMouseMove(e) {
+  const cp = getCanvasPos(e);
+  const wp = screenToWorld(cp.x, cp.y);
+  lastMouse = cp;
+  
+  if (isPanning) {
+    state.viewX = e.clientX - panStart.x;
+    state.viewY = e.clientY - panStart.y;
+    draw();
+    return;
+  }
+  
+  if (state.tool === 'connect' && state.connectFrom) {
+    state.connectPreview = wp;
+    draw();
+    return;
+  }
+  
+  if (state.tool === 'phase' && state.phaseStart != null) {
+    // Show preview
+    draw();
+    ctx2d.save();
+    ctx2d.translate(state.viewX, state.viewY);
+    ctx2d.scale(state.zoom, state.zoom);
+    ctx2d.fillStyle = '#EEEDFE55';
+    ctx2d.strokeStyle = '#534AB7';
+    ctx2d.lineWidth = 1.5;
+    ctx2d.setLineDash([5,3]);
+    const x = Math.min(state.phaseStart, wp.x);
+    const w = Math.abs(wp.x - state.phaseStart);
+    ctx2d.fillRect(x, 0, w, getTotalH());
+    ctx2d.strokeRect(x, 0, w, getTotalH());
+    ctx2d.setLineDash([]);
+    ctx2d.restore();
+    return;
+  }
+  
+  if (!dragState) {
+    // Update cursor
+    const hit = hitTest(wp.x, wp.y);
+    canvas.style.cursor = hit?.type === 'step' ? 'grab' : hit?.type === 'edge' ? 'crosshair' : hit?.type === 'phase' ? 'ew-resize' : 'default';
+    return;
+  }
+  
+  if (dragState.type === 'step') {
+    const step = state.steps.find(s => s.id === dragState.id);
+    if (step) {
+      step.x = Math.round((wp.x - dragState.startX) / GRID_SIZE) * GRID_SIZE;
+      step.y = Math.round((wp.y - dragState.startY) / GRID_SIZE) * GRID_SIZE;
+      // Snap to lane
+      state.lanes.forEach((l, i) => {
+        const ly = PHASE_HEADER_H + i * LANE_H;
+        if (step.y >= ly && step.y <= ly + LANE_H - step.h) step.laneId = l.id;
+      });
+      canvas.style.cursor = 'grabbing';
+      draw();
+    }
+  } else if (dragState.type === 'phase') {
+    const ph = state.phases.find(p => p.id === dragState.id);
+    if (ph) { ph.x = wp.x - dragState.startX; draw(); }
+  } else if (dragState.type === 'phase-resize') {
+    const ph = state.phases.find(p => p.id === dragState.id);
+    if (ph) { ph.w = Math.max(60, dragState.startW + (wp.x - dragState.startX)); draw(); }
+  }
+  
+  // Update mini toolbar position
+  updateMiniToolbar();
+}
+
+function onMouseUp(e) {
+  isPanning = false;
+  dragState = null;
+  canvas.style.cursor = 'default';
+}
+
+function onDblClick(e) {
+  const cp = getCanvasPos(e);
+  const wp = screenToWorld(cp.x, cp.y);
+  const hit = hitTest(wp.x, wp.y);
+  if (hit?.type === 'step') openInlineEditor(hit.id, 'step', cp);
+  else if (hit?.type === 'phase') openInlineEditor(hit.id, 'phase', cp);
+  else if (hit?.type === 'lane') openInlineEditor(hit.id, 'lane', cp);
+  else if (!hit) addStepAt(wp.x, wp.y);
+}
+
+function onRightClick(e) {
+  e.preventDefault();
+  const cp = getCanvasPos(e);
+  const wp = screenToWorld(cp.x, cp.y);
+  const hit = hitTest(wp.x, wp.y);
+  if (hit?.type === 'step') {
+    selectItem('step', hit.id);
+    showCtxMenu(e.clientX, e.clientY, hit.id);
+  }
+}
+
+function onWheel(e) {
+  e.preventDefault();
+  const cp = getCanvasPos(e);
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  const wx = (cp.x - state.viewX) / state.zoom;
+  const wy = (cp.y - state.viewY) / state.zoom;
+  state.zoom = Math.max(0.2, Math.min(3, state.zoom * delta));
+  state.viewX = cp.x - wx * state.zoom;
+  state.viewY = cp.y - wy * state.zoom;
+  draw();
+}
+
+// ============================================================
+// SELECTION & PROPERTIES
+// ============================================================
+function selectItem(type, id) {
+  state.selectedId = id;
+  state.selectedType = type;
+  updatePropertiesPanel();
+  updateMiniToolbar();
+  draw();
+}
+
+function updatePropertiesPanel() {
+  document.getElementById('no-selection').style.display = 'none';
+  document.getElementById('step-props').style.display = 'none';
+  document.getElementById('lane-props').style.display = 'none';
+  document.getElementById('phase-props').style.display = 'none';
+  
+  if (!state.selectedId) {
+    document.getElementById('no-selection').style.display = '';
+    return;
+  }
+  
+  if (state.selectedType === 'step') {
+    const step = state.steps.find(s => s.id === state.selectedId);
+    if (!step) return;
+    document.getElementById('step-props').style.display = '';
+    document.getElementById('prop-step-label').value = step.label;
+    buildColorGrid('step-color-grid', STEP_COLORS, step.color, (c, i) => {
+      step.color = c; step.textColor = STEP_TEXT[i]; draw();
+    });
+    const sel = document.getElementById('prop-step-lane');
+    sel.innerHTML = state.lanes.map(l => `<option value="${l.id}" ${l.id === step.laneId ? 'selected' : ''}>${l.name}</option>`).join('');
+    switchTab('properties');
+  } else if (state.selectedType === 'lane') {
+    const lane = state.lanes.find(l => l.id === state.selectedId);
+    if (!lane) return;
+    document.getElementById('lane-props').style.display = '';
+    document.getElementById('prop-lane-name').value = lane.name;
+    buildColorGrid('lane-color-grid', LANE_COLORS, lane.color, (c, i) => {
+      lane.color = c; lane.borderColor = LANE_BORDER[i]; draw();
+    });
+    switchTab('properties');
+  } else if (state.selectedType === 'phase') {
+    const ph = state.phases.find(p => p.id === state.selectedId);
+    if (!ph) return;
+    document.getElementById('phase-props').style.display = '';
+    document.getElementById('prop-phase-name').value = ph.name;
+    buildColorGrid('phase-color-grid', PHASE_COLORS, ph.color, (c, i) => {
+      ph.color = c; ph.borderColor = PHASE_BORDERS[i]; draw();
+    });
+    switchTab('properties');
+  }
+}
+
+function buildColorGrid(gridId, colors, selected, onPick) {
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = colors.map((c, i) => `
+    <div class="color-swatch ${c === selected ? 'selected' : ''}" style="background:${c}" onclick="pickColor('${gridId}',${i})"></div>
+  `).join('');
+  grid._colors = colors;
+  grid._onPick = onPick;
+}
+
+function pickColor(gridId, idx) {
+  const grid = document.getElementById(gridId);
+  grid._onPick(grid._colors[idx], idx);
+  grid.querySelectorAll('.color-swatch').forEach((el, i) => el.classList.toggle('selected', i === idx));
+}
+
+function updateSelectedLabel() {
+  const step = state.steps.find(s => s.id === state.selectedId);
+  if (step) { step.label = document.getElementById('prop-step-label').value; draw(); }
+}
+function updateLaneName() {
+  const lane = state.lanes.find(l => l.id === state.selectedId);
+  if (lane) { lane.name = document.getElementById('prop-lane-name').value; draw(); renderStructure(); }
+}
+function updatePhaseName() {
+  const ph = state.phases.find(p => p.id === state.selectedId);
+  if (ph) { ph.name = document.getElementById('prop-phase-name').value; draw(); renderStructure(); }
+}
+function updateSelectedLane() {
+  const step = state.steps.find(s => s.id === state.selectedId);
+  if (step) { step.laneId = document.getElementById('prop-step-lane').value; draw(); }
+}
+function deleteSelected() {
+  if (state.selectedType === 'step') deleteStep(state.selectedId);
+  else if (state.selectedType === 'connector') deleteConnector(state.selectedId);
+  selectItem(null, null);
+}
+function deleteSelectedLane() {
+  if (!state.selectedId) return;
+  state.lanes = state.lanes.filter(l => l.id !== state.selectedId);
+  state.steps = state.steps.filter(s => s.laneId !== state.selectedId);
+  selectItem(null, null); draw(); renderStructure();
+}
+function deleteSelectedPhase() {
+  if (!state.selectedId) return;
+  state.phases = state.phases.filter(p => p.id !== state.selectedId);
+  selectItem(null, null); draw(); renderStructure();
+}
+
+// ============================================================
+// MINI TOOLBAR
+// ============================================================
+function updateMiniToolbar() {
+  const tb = document.getElementById('mini-toolbar');
+  if (state.selectedType === 'step' && state.selectedId) {
+    const step = state.steps.find(s => s.id === state.selectedId);
+    if (!step) { tb.style.display = 'none'; return; }
+    const sp = worldToScreen(step.x + step.w / 2, step.y);
+    tb.style.display = 'flex';
+    tb.style.left = (sp.x - 50 + wrap.getBoundingClientRect().left) + 'px';
+    tb.style.top = (sp.y - 40 + wrap.getBoundingClientRect().top) + 'px';
+  } else {
+    tb.style.display = 'none';
+  }
+}
+
+document.getElementById('mt-edit').onclick = () => {
+  if (state.selectedType === 'step') {
+    const step = state.steps.find(s => s.id === state.selectedId);
+    if (step) {
+      const sp = worldToScreen(step.x, step.y);
+      const cp = { x: sp.x + wrap.getBoundingClientRect().left, y: sp.y + wrap.getBoundingClientRect().top };
+      openInlineEditor(step.id, 'step', cp);
+    }
+  }
+};
+document.getElementById('mt-duplicate').onclick = () => {
+  if (state.selectedType !== 'step') return;
+  const step = state.steps.find(s => s.id === state.selectedId);
+  if (!step) return;
+  const copy = { ...step, id: uid(), x: step.x + 20, y: step.y + 20 };
+  state.steps.push(copy);
+  selectItem('step', copy.id); draw();
+};
+document.getElementById('mt-delete').onclick = deleteSelected;
+
+// ============================================================
+// INLINE EDITOR
+// ============================================================
+function openInlineEditor(id, type, screenPos) {
+  const el = document.getElementById('inline-editor');
+  const ta = document.getElementById('inline-text');
+  
+  let obj = null;
+  if (type === 'step') obj = state.steps.find(s => s.id === id);
+  else if (type === 'phase') obj = state.phases.find(p => p.id === id);
+  else if (type === 'lane') obj = state.lanes.find(l => l.id === id);
+  if (!obj) return;
+  
+  ta.value = obj.label || obj.name || '';
+  el.style.display = 'block';
+  el.style.left = screenPos.x + wrap.getBoundingClientRect().left + 'px';
+  el.style.top = screenPos.y + wrap.getBoundingClientRect().top + 'px';
+  el.style.minWidth = type === 'step' ? '140px' : '120px';
+  ta.style.width = (type === 'step' ? 130 : 110) + 'px';
+  ta.rows = type === 'step' ? 2 : 1;
+  ta.focus();
+  ta.select();
+  
+  ta._commit = () => {
+    const val = ta.value.trim();
+    if (type === 'step' && obj) obj.label = val || obj.label;
+    if (type === 'phase' && obj) obj.name = val || obj.name;
+    if (type === 'lane' && obj) obj.name = val || obj.name;
+    el.style.display = 'none';
+    draw(); renderStructure(); updatePropertiesPanel();
+  };
+}
+
+document.getElementById('inline-text').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('inline-text')._commit?.(); }
+  if (e.key === 'Escape') { document.getElementById('inline-editor').style.display = 'none'; }
+});
+document.getElementById('inline-text').addEventListener('blur', e => {
+  setTimeout(() => { if (document.getElementById('inline-editor').style.display !== 'none') document.getElementById('inline-text')._commit?.(); }, 150);
+});
+document.addEventListener('mousedown', e => {
+  if (!document.getElementById('inline-editor').contains(e.target)) {
+    const ta = document.getElementById('inline-text');
+    if (ta._commit) ta._commit();
+  }
+});
+
+// ============================================================
+// CONTEXT MENU
+// ============================================================
+function showCtxMenu(x, y, stepId) {
+  const m = document.getElementById('ctx-menu');
+  m.style.display = 'block';
+  m.style.left = x + 'px';
+  m.style.top = y + 'px';
+  m._stepId = stepId;
+}
+function closeCtxMenu() { document.getElementById('ctx-menu').style.display = 'none'; }
+document.addEventListener('click', e => {
+  if (!document.getElementById('ctx-menu').contains(e.target)) closeCtxMenu();
+});
+
+document.getElementById('ctx-edit').onclick = () => {
+  const id = document.getElementById('ctx-menu')._stepId;
+  const step = state.steps.find(s => s.id === id);
+  if (!step) return;
+  const sp = worldToScreen(step.x, step.y);
+  openInlineEditor(id, 'step', { x: sp.x + wrap.getBoundingClientRect().left, y: sp.y + wrap.getBoundingClientRect().top });
+  closeCtxMenu();
+};
+document.getElementById('ctx-duplicate').onclick = () => {
+  const id = document.getElementById('ctx-menu')._stepId;
+  const step = state.steps.find(s => s.id === id);
+  if (!step) return;
+  const copy = { ...step, id: uid(), x: step.x + 20, y: step.y + 20 };
+  state.steps.push(copy); draw();
+  closeCtxMenu();
+};
+document.getElementById('ctx-add-before').onclick = () => {
+  const id = document.getElementById('ctx-menu')._stepId;
+  const step = state.steps.find(s => s.id === id);
+  if (!step) return;
+  const ns = createStep(step.x - STEP_W - 36, step.y, step.laneId);
+  state.connectors.push({ id: uid(), fromId: ns.id, toId: id, fromEdge: 'right', toEdge: 'left', label: '' });
+  draw(); closeCtxMenu();
+};
+document.getElementById('ctx-add-after').onclick = () => {
+  const id = document.getElementById('ctx-menu')._stepId;
+  const step = state.steps.find(s => s.id === id);
+  if (!step) return;
+  const ns = createStep(step.x + STEP_W + 36, step.y, step.laneId);
+  state.connectors.push({ id: uid(), fromId: id, toId: ns.id, fromEdge: 'right', toEdge: 'left', label: '' });
+  draw(); closeCtxMenu();
+};
+document.getElementById('ctx-delete').onclick = () => {
+  deleteStep(document.getElementById('ctx-menu')._stepId);
+  selectItem(null, null); draw(); closeCtxMenu();
+};
+
+// ============================================================
+// ADD / DELETE
+// ============================================================
+function createStep(x, y, laneId) {
+  const laneIdx = state.lanes.findIndex(l => l.id === laneId);
+  const ci = Math.max(0, laneIdx) % STEP_COLORS.length;
+  const ns = {
+    id: uid(), label: 'New Step',
+    x: x || 200, y: y || (PHASE_HEADER_H + LANE_H / 2 - STEP_H / 2),
+    w: STEP_W, h: STEP_H,
+    laneId: laneId || (state.lanes[0]?.id),
+    color: STEP_COLORS[ci], textColor: STEP_TEXT[ci], phaseId: null
+  };
+  state.steps.push(ns);
+  return ns;
+}
+
+function addStepAt(wx, wy) {
+  const laneIdx = Math.max(0, Math.floor((wy - PHASE_HEADER_H) / LANE_H));
+  const laneId = state.lanes[laneIdx]?.id || state.lanes[0]?.id;
+  if (!laneId && state.lanes.length === 0) {
+    addLane(); 
+  }
+  const ns = createStep(wx - STEP_W/2, wy - STEP_H/2, laneId || state.lanes[0]?.id);
+  selectItem('step', ns.id); draw();
+  showHint('Double-click to edit label');
+}
+
+document.getElementById('btn-add-step').onclick = () => {
+  if (state.lanes.length === 0) addLane();
+  const ns = createStep(
+    LANE_HEADER_W + 30 + state.steps.length * 20,
+    PHASE_HEADER_H + (LANE_H - STEP_H) / 2,
+    state.lanes[0]?.id
+  );
+  selectItem('step', ns.id); draw();
+};
+
+function deleteStep(id) {
+  state.steps = state.steps.filter(s => s.id !== id);
+  state.connectors = state.connectors.filter(c => c.fromId !== id && c.toId !== id);
+}
+function deleteConnector(id) {
+  state.connectors = state.connectors.filter(c => c.id !== id);
+}
+
+function addLane() {
+  const i = state.lanes.length;
+  state.lanes.push({
+    id: uid(), name: `Lane ${i + 1}`,
+    color: LANE_COLORS[i % LANE_COLORS.length],
+    borderColor: LANE_BORDER[i % LANE_BORDER.length]
+  });
+  draw(); renderStructure();
+}
+document.getElementById('btn-add-lane').onclick = addLane;
+
+// ============================================================
+// TOOLS
+// ============================================================
+function setTool(t) {
+  state.tool = t;
+  state.connectFrom = null;
+  state.connectPreview = null;
+  state.phaseStart = null;
+  document.querySelectorAll('#topbar .tool-group .tb-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-' + t).classList.add('active');
+  canvas.style.cursor = t === 'connect' ? 'crosshair' : 'default';
+  draw();
+}
+document.getElementById('tool-select').onclick = () => setTool('select');
+document.getElementById('tool-connect').onclick = () => { setTool('connect'); showHint('Click an edge dot on a step, then click the target step'); };
+document.getElementById('tool-phase').onclick = () => { setTool('phase'); showHint('Click to set phase start, click again to set end'); };
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+  if (e.key === 'v' || e.key === 'V') setTool('select');
+  if (e.key === 'c' || e.key === 'C') setTool('connect');
+  if (e.key === 'p' || e.key === 'P') { setTool('phase'); showHint('Click to set phase start, click again to set end'); }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedId) {
+    if (state.selectedType === 'step') deleteStep(state.selectedId);
+    if (state.selectedType === 'connector') deleteConnector(state.selectedId);
+    selectItem(null, null); draw();
+  }
+  if (e.key === 'Escape') { selectItem(null, null); state.connectFrom = null; state.phaseStart = null; draw(); }
+});
+
+// ============================================================
+// ZOOM & FIT
+// ============================================================
+document.getElementById('btn-zoom-in').onclick = () => { state.zoom = Math.min(3, state.zoom * 1.2); draw(); };
+document.getElementById('btn-zoom-out').onclick = () => { state.zoom = Math.max(0.2, state.zoom * 0.8); draw(); };
+document.getElementById('btn-zoom-fit').onclick = fitView;
+
+function fitView() {
+  if (!state.steps.length && !state.lanes.length) return;
+  const W = canvas.width, H = canvas.height;
+  const totalW = getTotalW() + LANE_HEADER_W;
+  const totalH = getTotalH();
+  const scaleX = (W - 80) / totalW;
+  const scaleY = (H - 80) / totalH;
+  state.zoom = Math.min(scaleX, scaleY, 1.5);
+  state.viewX = (W - totalW * state.zoom) / 2;
+  state.viewY = 40;
+  draw();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.p-tab').forEach(tab => {
+  tab.onclick = () => switchTab(tab.dataset.tab);
+});
+function switchTab(name) {
+  document.querySelectorAll('.p-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.panel-section').forEach(s => s.classList.toggle('active', s.id === 'tab-' + name));
+}
+
+// ============================================================
+// STRUCTURE PANEL
+// ============================================================
+function renderStructure() {
+  const el = document.getElementById('structure-list');
+  const lines = [];
+  state.phases.forEach(ph => {
+    lines.push(`<div style="padding:4px 0;font-weight:500;color:${ph.borderColor};border-left:3px solid ${ph.borderColor};padding-left:8px;margin-bottom:4px;">${ph.name}</div>`);
+  });
+  state.lanes.forEach(lane => {
+    lines.push(`<div style="margin:8px 0 4px;font-weight:500;font-size:12px;color:#444;">${lane.name}</div>`);
+    const laneSteps = state.steps.filter(s => s.laneId === lane.id);
+    laneSteps.forEach(s => {
+      lines.push(`<div style="padding:3px 8px;margin:2px 0;background:#f7f6f3;border-radius:4px;font-size:11px;cursor:pointer;" onclick="selectItem('step','${s.id}');switchTab('properties');">${s.label}</div>`);
+    });
+  });
+  el.innerHTML = lines.join('');
+}
+
+// ============================================================
+// EXPORT SVG
+// ============================================================
+document.getElementById('btn-export').onclick = () => {
+  const totalW = getTotalW();
+  const totalH = getTotalH();
+  const pad = 20;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalW + pad*2}" height="${totalH + pad*2}" viewBox="${-pad} ${-pad} ${totalW + pad*2} ${totalH + pad*2}" font-family="DM Sans, sans-serif">`;
+  
+  // Phases
+  state.phases.forEach(ph => {
+    svg += `<rect x="${ph.x}" y="0" width="${ph.w}" height="${totalH}" fill="${ph.color}55" stroke="${ph.borderColor}88" stroke-width="1" rx="6"/>`;
+    svg += `<rect x="${ph.x}" y="0" width="${ph.w}" height="${PHASE_HEADER_H}" fill="${ph.borderColor}" rx="6"/>`;
+    svg += `<text x="${ph.x + ph.w/2}" y="20" text-anchor="middle" fill="white" font-size="11" font-weight="500">${ph.name}</text>`;
+  });
+  
+  // Lanes
+  state.lanes.forEach((l, i) => {
+    const y = PHASE_HEADER_H + i * LANE_H;
+    svg += `<rect x="0" y="${y}" width="${LANE_HEADER_W}" height="${LANE_H}" fill="${l.color}cc" stroke="${l.borderColor}55" rx="6"/>`;
+    svg += `<rect x="${LANE_HEADER_W}" y="${y}" width="${totalW - LANE_HEADER_W}" height="${LANE_H}" fill="${l.color}33"/>`;
+    svg += `<text x="${LANE_HEADER_W/2}" y="${y + LANE_H/2 + 5}" text-anchor="middle" fill="${l.borderColor}" font-size="13" font-weight="500">${l.name}</text>`;
+  });
+  
+  // Connectors
+  state.connectors.forEach(conn => {
+    const from = state.steps.find(s => s.id === conn.fromId);
+    const to = state.steps.find(s => s.id === conn.toId);
+    if (!from || !to) return;
+    const fp = getEdgePoint(from, conn.fromEdge || 'right');
+    const tp = getEdgePoint(to, conn.toEdge || 'left');
+    svg += `<line x1="${fp.x}" y1="${fp.y}" x2="${tp.x}" y2="${tp.y}" stroke="${CONNECTOR_COLOR}" stroke-width="1.5" marker-end="url(#arrow)"/>`;
+  });
+  
+  // Arrow marker
+  svg = svg.replace('<svg', `<svg><defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="${CONNECTOR_COLOR}"/></marker></defs>`.replace('<svg>', '')) + '';
+  
+  // Steps
+  state.steps.forEach(s => {
+    svg += `<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" fill="${s.color}" stroke="${s.textColor}88" rx="8"/>`;
+    const words = s.label.split(' ');
+    const lines = [];
+    let line = '';
+    words.forEach(w => { if ((line + ' ' + w).trim().length > 16 && line) { lines.push(line); line = w; } else line = (line + ' ' + w).trim(); });
+    if (line) lines.push(line);
+    const sy = s.y + s.h/2 - (lines.length-1)*8;
+    lines.forEach((l, i) => {
+      svg += `<text x="${s.x + s.w/2}" y="${sy + i*16}" text-anchor="middle" fill="${s.textColor}" font-size="11" font-weight="500">${l}</text>`;
+    });
+  });
+  
+  svg += '</svg>';
+  
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'journey-map.svg'; a.click();
+  URL.revokeObjectURL(url);
+};
+
+// ============================================================
+// INIT — demo state
+// ============================================================
+function initDemo() {
+  state.lanes = [
+    { id: uid(), name: 'Customer', color: LANE_COLORS[0], borderColor: LANE_BORDER[0] },
+    { id: uid(), name: 'Support Team', color: LANE_COLORS[1], borderColor: LANE_BORDER[1] },
+    { id: uid(), name: 'Backend System', color: LANE_COLORS[2], borderColor: LANE_BORDER[2] },
+  ];
+  
+  const laneIds = state.lanes.map(l => l.id);
+  
+  const stepDefs = [
+    { label: 'Discovers product', lane: 0, x: 150 },
+    { label: 'Signs up online', lane: 0, x: 330 },
+    { label: 'Contacts support', lane: 0, x: 510 },
+    { label: 'Receives resolution', lane: 0, x: 690 },
+    { label: 'Leaves review', lane: 0, x: 870 },
+    { label: 'Greets & qualifies', lane: 1, x: 510 },
+    { label: 'Escalates ticket', lane: 1, x: 690 },
+    { label: 'Sends confirmation', lane: 2, x: 330 },
+    { label: 'Logs ticket', lane: 2, x: 510 },
+    { label: 'Updates CRM', lane: 2, x: 690 },
+  ];
+  
+  stepDefs.forEach((d, i) => {
+    const ci = d.lane % STEP_COLORS.length;
+    const y = PHASE_HEADER_H + d.lane * LANE_H + (LANE_H - STEP_H) / 2;
+    state.steps.push({ id: uid(), label: d.label, laneId: laneIds[d.lane], x: d.x, y, w: STEP_W, h: STEP_H, color: STEP_COLORS[ci], textColor: STEP_TEXT[ci], phaseId: null });
+  });
+  
+  // Connectors
+  const s = state.steps;
+  [[0,1],[1,2],[2,3],[3,4],[2,5],[5,6],[1,7],[7,8],[8,9]].forEach(([a,b]) => {
+    state.connectors.push({ id: uid(), fromId: s[a].id, toId: s[b].id, fromEdge: 'right', toEdge: 'left', label: '' });
+  });
+  
+  state.phases = [
+    { id: uid(), name: 'Awareness', x: LANE_HEADER_W + 10, w: 220, color: PHASE_COLORS[0], borderColor: PHASE_BORDERS[0] },
+    { id: uid(), name: 'Onboarding', x: LANE_HEADER_W + 235, w: 220, color: PHASE_COLORS[1], borderColor: PHASE_BORDERS[1] },
+    { id: uid(), name: 'Support', x: LANE_HEADER_W + 460, w: 220, color: PHASE_COLORS[2], borderColor: PHASE_BORDERS[2] },
+    { id: uid(), name: 'Retention', x: LANE_HEADER_W + 685, w: 220, color: PHASE_COLORS[3], borderColor: PHASE_BORDERS[3] },
+  ];
+  
+  renderStructure();
+  fitView();
+}
+
+function boot() {
+  initApiKey();
+  resize();
+  if (canvas.width === 0 || canvas.height === 0) {
+    // Layout not ready yet — retry
+    setTimeout(boot, 50);
+    return;
+  }
+  initDemo();
+}
+
+if (document.readyState === 'complete') {
+  requestAnimationFrame(boot);
+} else {
+  window.addEventListener('load', () => requestAnimationFrame(boot));
+}
+</script>
 </body>
 </html>
